@@ -13,3 +13,4 @@ build/
 *.img
 *.iso
 secret.txt
+XV6_FILESYSTEM_INTEGRATION.md
