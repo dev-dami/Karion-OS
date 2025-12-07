@@ -52,6 +52,9 @@ int cmd_mkdir(char** args);
 int cmd_ls(char** args);
 int cmd_pwd(char** args);
 int cmd_cd(char** args);
+int cmd_touch(char** args);
+int cmd_del(char** args);
+int cmd_cat(char** args);
 
 // Utility funcs
 void print_prompt();
