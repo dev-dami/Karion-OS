@@ -18,16 +18,38 @@ void print_string(char* str, unsigned char color)
 {
     int index = 0;
     while (str[index]) {
+        // Check to wrap to next line
+        if (vga_index % 80 == 79) {
+            print_newline();
+        }
+
         terminal_buffer[vga_index] = (unsigned short)str[index] | (unsigned short)color << 8;
         index++;
         vga_index++;
+
+        // Check to scroll the screen
+        if (vga_index >= 80 * 25) {
+            scroll_screen_up();
+            vga_index = (24 * 80); // Position at the last line
+        }
     }
 }
 
 void print_char(char str, unsigned char color)
 {
+    // Check to wrap to next line
+    if (vga_index % 80 == 79) {
+        print_newline();
+    }
+
     terminal_buffer[vga_index] = str | (unsigned short)color << 8;
     vga_index++;
+
+    // Check to scroll the screen
+    if (vga_index >= 80 * 25) {
+        scroll_screen_up();
+        vga_index = (24 * 80); // Position at the last line
+    }
 }
 
 void backspace_char(void)
@@ -35,6 +57,19 @@ void backspace_char(void)
     if (vga_index > 0) {
         vga_index--;
         terminal_buffer[vga_index] = ' ' | (unsigned short)WHITE_COLOR << 8;  // Clear char
+    }
+}
+
+void scroll_screen_up(void)
+{
+    // Move lines up by one
+    for (int i = 0; i < 24 * 80; i++) {
+        terminal_buffer[i] = terminal_buffer[i + 80];
+    }
+
+    // Clear last line
+    for (int i = 24 * 80; i < 25 * 80; i++) {
+        terminal_buffer[i] = ' ' | (unsigned short)WHITE_COLOR << 8;
     }
 }
 
@@ -97,9 +132,12 @@ void print_newline(void)
     int current_line = vga_index / 80;
     vga_index = (current_line + 1) * 80;
 
-    // Wrap if screen end reached
+    // If reached bottom of screen, scroll
     if (vga_index >= 80 * 25) {
-        vga_index = (current_line % 25) * 80;
+        // Scroll screen up by one line
+        scroll_screen_up();
+        // Position cursor at last line
+        vga_index = (24 * 80);
     }
 }
 
@@ -107,11 +145,22 @@ void print_formatted_string(char* str, unsigned char color)
 {
     int index = 0;
     while (str[index] != '\0') {
-        if (str[index] == '\n') print_newline();
-        else {
-            if (vga_index % 80 == 79) print_newline();  // line wrap
+        if (str[index] == '\n') {
+            print_newline();
+        } else {
+            // Check to wrap to next line
+            if (vga_index % 80 == 79) {
+                print_newline();
+            }
+
             terminal_buffer[vga_index] = str[index] | (unsigned short)color << 8;
             vga_index++;
+
+            // Check to scroll the screen
+            if (vga_index >= 80 * 25) {
+                scroll_screen_up();
+                vga_index = (24 * 80); // Position at the last line
+            }
         }
         index++;
     }

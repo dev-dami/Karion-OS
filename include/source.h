@@ -18,6 +18,7 @@ void print_string(char* str, unsigned char color);
 void print_char(char str, unsigned char color);
 void clear_screen(void);
 void backspace_char(void);
+void scroll_screen_up(void);
 
 // String util funcs
 int strlen(const char* str);

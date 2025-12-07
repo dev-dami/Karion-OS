@@ -12,3 +12,4 @@ build/
 # OS files
 *.img
 *.iso
+secret.txt
