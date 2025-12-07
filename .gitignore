@@ -1,0 +1,14 @@
+# Build artifacts
+build/
+*.bin
+*.iso
+
+# IDE files
+.vscode/
+.idea/
+.cursor/
+.cursorrules
+
+# OS files
+*.img
+*.iso
