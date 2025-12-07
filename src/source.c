@@ -114,6 +114,17 @@ char* strncpy(char* dest, const char* src, int n)
     return dest;
 }
 
+char* strchr(const char* str, int c)
+{
+    int i = 0;
+    while (str[i] != '\0') {
+        if (str[i] == c) return (char*)&str[i];
+        i++;
+    }
+    if (c == '\0') return (char*)&str[i];  // NULL terminator
+    return NULL;
+}
+
 char* strrchr(const char* str, int c)
 {
     char* last = NULL;
