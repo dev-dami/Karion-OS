@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Karion-OS Build Script
+set -euo pipefail
 
 echo "Building Karion-OS..."
 
@@ -10,8 +11,8 @@ if ! [ -x "$(which nasm)" ]; then
   exit 1
 fi
 
-if ! [ -x "$(which gcc)" ]; then
-  echo "Error: gcc is not installed." >&2
+if ! [ -x "$(which cargo)" ]; then
+  echo "Error: cargo is not installed." >&2
   exit 1
 fi
 
@@ -23,37 +24,48 @@ fi
 # Create build artifacts directory
 mkdir -p buildartifacts
 
-# Compile the C source files with include path
-gcc -m32 -c src/kernel.c -o buildartifacts/kernel.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/source.c -o buildartifacts/source.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/keyboard.c -o buildartifacts/keyboard.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/shell.c -o buildartifacts/shell.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/filesystem.c -o buildartifacts/filesystem.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/malloc.c -o buildartifacts/malloc.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/ramdisk.c -o buildartifacts/ramdisk.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/block.c -o buildartifacts/block.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/buffer.c -o buildartifacts/buffer.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
-gcc -m32 -c src/inode.c -o buildartifacts/inode.o -ffreestanding -fno-stack-protector -nostdlib -Wall -Wextra -I include
+RUST_TARGET="i686-unknown-linux-gnu"
+RUST_MANIFEST="rust/karion_kernel/Cargo.toml"
+RUST_LIB="rust/karion_kernel/target/${RUST_TARGET}/release/libkarion_kernel.a"
+
+# Ensure 32-bit Rust target is available
+if ! rustup target list --installed | grep -q "^${RUST_TARGET}$"; then
+  echo "Installing missing Rust target: ${RUST_TARGET}"
+  rustup target add "${RUST_TARGET}"
+fi
+
+# Build Rust kernel core (replaces C kernel objects)
+cargo build --manifest-path "${RUST_MANIFEST}" --release --target "${RUST_TARGET}"
 
 # Compile the assembly files using NASM
 nasm -f elf32 src/boot.asm -o buildartifacts/boot.o
+nasm -f elf32 src/isr.asm -o buildartifacts/isr.o
 
 # Link everything together
-ld -m elf_i386 -T src/linker.ld -o buildartifacts/kernel.bin buildartifacts/boot.o buildartifacts/kernel.o buildartifacts/source.o buildartifacts/keyboard.o buildartifacts/shell.o buildartifacts/filesystem.o buildartifacts/malloc.o buildartifacts/ramdisk.o buildartifacts/block.o buildartifacts/buffer.o buildartifacts/inode.o
+ld -m elf_i386 -T src/linker.ld -o buildartifacts/kernel.bin \
+  buildartifacts/boot.o \
+  buildartifacts/isr.o \
+  "${RUST_LIB}"
 
 # Create ISO if GRUB is available
 if [ -x "$(which grub-mkrescue)" ]; then
-    # Create boot directory structure
-    mkdir -p iso/boot/grub
+    # Create boot directory structure in a separate staging folder
+    mkdir -p isodir/boot/grub
 
     # Copy kernel and rename it to "kernel" (without .bin extension) to match grub.cfg
-    cp buildartifacts/kernel.bin iso/boot/kernel
+    cp buildartifacts/kernel.bin isodir/boot/kernel
 
     # Copy grub config
-    cp src/grub.cfg iso/boot/grub/
+    cp src/grub.cfg isodir/boot/grub/
 
-    # Create ISO in iso folder
-    grub-mkrescue -o iso/Karion-OS.iso iso/
+    # Ensure output directory exists
+    mkdir -p iso
+
+    # Create ISO in iso folder (reading from isodir)
+    grub-mkrescue -o iso/Karion-OS.iso isodir/
+
+    # Cleanup staging directory
+    rm -rf isodir
 
     echo "Build complete!"
     echo "Kernel: buildartifacts/kernel.bin"
