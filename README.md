@@ -1,40 +1,60 @@
 # Karion-OS
 
-A minimal educational operating system with a shell interface and an inode-based file system.
+A bare-metal x86 operating system kernel written in Rust, featuring a Unix-like shell, block filesystem, text editor, BASIC interpreter, and built-in games.
 
-## Why This Project
+## Why Rust?
 
-Karion-OS was developed as a hands-on learning project to explore the fundamentals of operating systems. The focus is on:
+This project started in C. It worked, but I kept running into the same problems — buffer overflows, memory leaks that were impossible to track down, data races in interrupt handlers, and just general undefined behavior that would silently corrupt things. Debugging a kernel with no OS underneath to catch your mistakes is brutal.
 
-* **Understanding OS basics**: Booting, memory, and system initialization
-* **Hardware interaction**: Keyboard and VGA communication
-* **System design**: Shell interface, I/O handling, and file system implementation
-* **C and Assembly integration**: Combining low-level hardware control with high-level programming
-* **File system architecture**: Inode-based storage, block allocation, and directory management
+At some point I was fighting with a heap allocator bug that was silently leaking memory and I just thought — why not try Rust? So I said f it and started porting everything over.
 
-This project offers practical experience in systems programming and shows how OS components work together from boot to user interaction.
+Turns out it was the right call:
+- The borrow checker caught a data race in the keyboard ring buffer that I never would have found in C
+- `cargo test` lets me run 90 unit tests on my actual kernel code without booting a VM
+- The compiler literally won't let you forget to handle cases (every keyboard scancode, every shell command)
+- `unsafe` blocks are only where they have to be (hardware registers, VGA framebuffer) — everything else is safe
+
+Only `boot.asm` and `isr.asm` are still assembly because interrupt stubs need `pushad`/`iret`. Everything else is Rust.
 
 ## Features
 
-* Command-line shell with prompt
-* Inode-based file system (Xv6-inspired): block allocation, directory entries, file operations
-* Memory allocator: heap-based dynamic memory management
-* RAM disk: simulated block device storage
-* Colored text output
-* Keyboard input handling
+- **Boot Animation** — ASCII art logo with animated progress bar
+- **Unix-Like Shell** — Command history (arrow keys), path navigation, I/O redirection
+- **Block Filesystem** — 1MB RAM disk with inodes, directories, file create/read/write/delete
+- **Text Editor (nano)** — Full-screen editor with Ctrl+S save, Ctrl+X exit, line editing
+- **BASIC Interpreter** — Variables, if/else, while/for loops, print, interactive REPL
+- **Games** — Snake, Tic-Tac-Toe, number guessing
+- **Memory Management** — Physical memory manager, paging, kernel heap with coalescing
+- **Hardware Drivers** — PIT timer (100Hz), PS/2 keyboard with shift/ctrl, VGA text mode
+- **Interrupt Handling** — GDT, IDT, PIC 8259, syscall interface (INT 0x80)
 
-## Commands
+## Shell Commands
 
-* `help` — Show commands
-* `clear` — Clear screen
-* `echo` — Print text (or use `echo text > file` to write to file)
-* `touch` — Create file
-* `cat` — Read and display file contents
-* `ls` — List directory
-* `pwd` — Show current directory
-* `cd` — Change directory
-* `mkdir` — Create directory
-* `del` — Delete file or directory
+| Command | Description |
+|---------|-------------|
+| `help [cmd]` | Show help |
+| `clear` | Clear screen |
+| `echo [text] [> file]` | Print text or redirect to file |
+| `ls [path]` | List directory |
+| `cd <dir>` | Change directory |
+| `pwd` | Print working directory |
+| `cat <file>` | Read file |
+| `touch <file>` | Create empty file |
+| `mkdir <dir>` | Create directory |
+| `rm <path>` | Remove file/directory |
+| `mv <src> <dst>` | Move/rename |
+| `stat <path>` | File info |
+| `whoami` | Current user |
+| `hostname` | System hostname |
+| `uname [-a]` | System info |
+| `uptime` | System uptime |
+| `meminfo` | Memory usage |
+| `history` | Command history |
+| `nano [file]` | Text editor |
+| `basic [file]` | BASIC interpreter/REPL |
+| `snake` | Snake game |
+| `tictactoe` | Tic-Tac-Toe |
+| `guess` | Number guessing game |
 
 ## Build
 
@@ -42,4 +62,48 @@ This project offers practical experience in systems programming and shows how OS
 ./build.sh
 ```
 
-This generates `buildartifacts/kernel.bin` and `iso/Karion-OS.iso` for emulation.
+Builds the Rust kernel, assembles boot/ISR stubs with NASM, links with LD, and creates a bootable GRUB ISO.
+
+**Requirements:** `nasm`, `ld` (i686 cross-linker), `grub-mkrescue`, `xorriso`, Rust with `i686-unknown-linux-gnu` target.
+
+Run tests:
+```bash
+cd rust/karion_kernel && cargo test
+```
+
+## Architecture
+
+```
+src/
+  boot.asm          Multiboot entry, stack setup
+  isr.asm           Interrupt/exception stubs (pushad/iret)
+  linker.ld         ELF layout at 1MB
+  grub.cfg          GRUB bootloader config
+
+rust/karion_kernel/src/
+  lib.rs            Kernel entry point, init sequence, main loop
+  gdt.rs            Global Descriptor Table (flat model)
+  idt.rs            Interrupt Descriptor Table (256 entries)
+  isr.rs            Interrupt dispatcher, exception handlers
+  pic.rs            PIC 8259 initialization and EOI
+  pmm.rs            Physical memory manager (bitmap, 32MB)
+  paging.rs         x86 paging (identity maps 20MB)
+  heap.rs           Kernel heap allocator (linked-list, 4MB)
+  vga.rs            VGA text-mode framebuffer (80x25, 16 colors)
+  keyboard.rs       PS/2 scancode decoder (shift, ctrl, extended)
+  shell.rs          Shell with history and command dispatch
+  fs.rs             Filesystem interface (paths, cwd, CRUD)
+  blockfs.rs        Block filesystem (inodes, bitmaps, RAM disk)
+  editor.rs         Nano-like text editor
+  basic.rs          BASIC interpreter with REPL
+  games/            Snake, Tic-Tac-Toe, number guessing
+  drivers/          PIT timer, PS/2 keyboard IRQ handler
+  io.rs             Port I/O (inb, outb)
+  syscall.rs        INT 0x80 syscall interface
+  boot_anim.rs      Boot animation sequence
+  intrinsics.rs     memcpy, memset, etc. for no_std
+```
+
+## License
+
+See [LICENSE](LICENSE).
