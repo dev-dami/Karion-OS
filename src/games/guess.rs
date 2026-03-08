@@ -25,7 +25,7 @@ pub fn run() {
     loop {
         vga::clear_screen();
         vga::write_centered(1, "NUMBER GUESSING GAME", vga::YELLOW);
-        vga::write_centered(3, "Guess a number between 1 and 100  -  ESC to quit", vga::CYAN);
+        vga::write_centered(3, "Guess a number between 1 and 100  -  Q/ESC to quit", vga::CYAN);
         vga::newline();
 
         // Generate target 1-100
@@ -42,7 +42,7 @@ pub fn run() {
         loop {
             let key = keyboard::poll_key();
             match key {
-                KeyEvent::Esc => return,
+                KeyEvent::Esc | KeyEvent::Char(b'q') | KeyEvent::Char(b'Q') => return,
                 KeyEvent::Char(c) if c >= b'0' && c <= b'9' => {
                     if input_len < 3 {
                         input_buf[input_len] = c;
@@ -85,11 +85,11 @@ pub fn run() {
                         vga::newline();
                         vga::newline();
                         vga::set_cursor(vga::cursor_row(), 2);
-                        vga::write_str("ENTER to play again  -  ESC to quit", vga::LIGHT_GRAY);
+                        vga::write_str("ENTER to play again  -  Q/ESC to quit", vga::LIGHT_GRAY);
 
                         loop {
                             match keyboard::poll_key() {
-                                KeyEvent::Esc => return,
+                                KeyEvent::Esc | KeyEvent::Char(b'q') | KeyEvent::Char(b'Q') => return,
                                 KeyEvent::Enter => {
                                     seed = timer::get_ticks() as u32;
                                     break;

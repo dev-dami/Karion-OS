@@ -216,12 +216,15 @@ impl Shell {
                     return;
                 } else if streq(cmd, "snake") {
                     crate::games::snake::run();
+                    vga::clear_screen();
                     return;
                 } else if streq(cmd, "tictactoe") {
                     crate::games::tictactoe::run();
+                    vga::clear_screen();
                     return;
                 } else if streq(cmd, "guess") {
                     crate::games::guess::run();
+                    vga::clear_screen();
                     return;
                 } else if streq(cmd, "basic") {
                     self.basic(&tokens, argc, fs);

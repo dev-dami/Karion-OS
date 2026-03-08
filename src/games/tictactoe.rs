@@ -158,7 +158,7 @@ pub fn run() {
     loop {
         vga::clear_screen();
         vga::write_centered(1, "TIC-TAC-TOE", vga::YELLOW);
-        vga::write_centered(3, "You are X  -  Keys 1-9 to place  -  ESC to quit", vga::CYAN);
+        vga::write_centered(3, "You are X  -  Keys 1-9 to place  -  Q/ESC to quit", vga::CYAN);
 
         let mut game = Game::new(seed);
         draw_grid();
@@ -171,7 +171,7 @@ pub fn run() {
         loop {
             let key = keyboard::poll_key();
             match key {
-                KeyEvent::Esc => return,
+                KeyEvent::Esc | KeyEvent::Char(b'q') | KeyEvent::Char(b'Q') => return,
                 KeyEvent::Char(c) if c >= b'1' && c <= b'9' => {
                     let pos = (c - b'1') as usize;
                     if game.board[pos] != EMPTY {
@@ -213,12 +213,12 @@ pub fn run() {
             _ => vga::YELLOW,
         };
         vga::write_centered(18, msg, color);
-        vga::write_centered(20, "ENTER to play again  -  ESC to quit", vga::LIGHT_GRAY);
+        vga::write_centered(20, "ENTER to play again  -  Q/ESC to quit", vga::LIGHT_GRAY);
 
-        // Wait for Enter or Esc
+        // Wait for Enter or Esc/Q
         loop {
             match keyboard::poll_key() {
-                KeyEvent::Esc => return,
+                KeyEvent::Esc | KeyEvent::Char(b'q') | KeyEvent::Char(b'Q') => return,
                 KeyEvent::Enter => {
                     seed = timer::get_ticks() as u32;
                     break;

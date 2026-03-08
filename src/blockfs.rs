@@ -394,7 +394,16 @@ fn names_equal(stored: &[u8], name: &[u8]) -> bool {
     if slen != name.len() {
         return false;
     }
-    stored[..slen] == *name
+    // Manual byte-by-byte comparison (Rust's == on slices is broken on this
+    // bare-metal i686 target with static relocation model)
+    let mut i = 0;
+    while i < slen {
+        if stored[i] != name[i] {
+            return false;
+        }
+        i += 1;
+    }
+    true
 }
 
 // Free all data blocks owned by an inode

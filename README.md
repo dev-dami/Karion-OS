@@ -1,5 +1,7 @@
 # Karion-OS
 
+> **This project is under active development.** A lot of things are buggy, incomplete, or straight up broken. Expect crashes, weird behavior, and missing features. If something doesn't work, it's probably a known issue. PRs and bug reports welcome.
+
 A bare-metal x86 operating system kernel written in Rust, featuring a Unix-like shell, block filesystem, text editor, BASIC interpreter, and built-in games.
 
 ## Why Rust?
@@ -18,17 +20,21 @@ Only `boot.asm` and `isr.asm` are still assembly because interrupt stubs need `p
 
 ## Features
 
+> Most of these work but some are still buggy. The filesystem, shell commands, and games all have rough edges. Don't expect everything to work perfectly — this is a hobby OS, not production software.
+
 - **Boot Animation** — ASCII art logo with animated progress bar
 - **Unix-Like Shell** — Command history (arrow keys), path navigation, I/O redirection
 - **Block Filesystem** — 1MB RAM disk with inodes, directories, file create/read/write/delete
-- **Text Editor (nano)** — Full-screen editor with Ctrl+S save, Ctrl+X exit, line editing
-- **BASIC Interpreter** — Variables, if/else, while/for loops, print, interactive REPL
-- **Games** — Snake, Tic-Tac-Toe, number guessing
+- **Text Editor (nano)** — Full-screen editor with Ctrl+S save, Ctrl+X exit, line editing (buggy)
+- **BASIC Interpreter** — Variables, if/else, while/for loops, print, interactive REPL (buggy)
+- **Games** — Snake, Tic-Tac-Toe, number guessing (press Q or ESC to quit)
 - **Memory Management** — Physical memory manager, paging, kernel heap with coalescing
 - **Hardware Drivers** — PIT timer (100Hz), PS/2 keyboard with shift/ctrl, VGA text mode
 - **Interrupt Handling** — GDT, IDT, PIC 8259, syscall interface (INT 0x80)
 
 ## Shell Commands
+
+> Some commands might not work as expected — especially path-based ones like `cd`, `cat`, `mv`. Known issue with string comparison on this bare-metal target.
 
 | Command | Description |
 |---------|-------------|
@@ -108,6 +114,16 @@ src/
   boot_anim.rs        Boot animation sequence
   intrinsics.rs       memcpy, memset, etc. for no_std
 ```
+
+## Known Issues
+
+- String comparison is broken on the bare-metal i686 target — Rust's `==` on `&str` generates bad code with static relocation. We use a manual byte-by-byte workaround but it doesn't cover every code path yet
+- The text editor (nano) can be glitchy with long lines
+- The BASIC interpreter is minimal — no functions, no arrays, single-char variable names only
+- Filesystem is RAM-only — everything is lost on reboot
+- No networking, no processes, no multitasking (yet)
+- Games might leave visual artifacts when quitting
+- A lot of things will probably crash in ways we haven't found yet
 
 ## License
 

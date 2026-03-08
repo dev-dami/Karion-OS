@@ -209,7 +209,7 @@ fn draw_snake_full(snake: &Snake) {
 
 pub fn run() {
     vga::clear_screen();
-    vga::write_centered(0, "SNAKE  -  WASD/Arrows to move  -  ESC to quit", vga::CYAN);
+    vga::write_centered(0, "SNAKE  -  WASD/Arrows to move  -  Q/ESC to quit", vga::CYAN);
     draw_border();
 
     let seed = timer::get_ticks() as u32;
@@ -224,7 +224,7 @@ pub fn run() {
 
     loop {
         match keyboard::poll_key() {
-            KeyEvent::Esc => return,
+            KeyEvent::Esc | KeyEvent::Char(b'q') | KeyEvent::Char(b'Q') => return,
             KeyEvent::Char(b'w') | KeyEvent::Char(b'W') | KeyEvent::ArrowUp => {
                 if snake.dir != Dir::Down {
                     snake.dir = Dir::Up;

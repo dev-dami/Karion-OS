@@ -251,10 +251,10 @@ impl FileSystem {
             }
 
             let segment = &bytes[start..i];
-            if segment == b"." {
+            if segment.len() == 1 && segment[0] == b'.' {
                 continue;
             }
-            if segment == b".." {
+            if segment.len() == 2 && segment[0] == b'.' && segment[1] == b'.' {
                 // Go to parent: find the parent of current inode
                 if current == 0 {
                     // Already at root
