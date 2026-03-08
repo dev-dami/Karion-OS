@@ -5,77 +5,51 @@ set -euo pipefail
 
 echo "Building Karion-OS..."
 
-# Check if required tools are available
-if ! [ -x "$(which nasm)" ]; then
-  echo "Error: nasm is not installed." >&2
-  exit 1
-fi
+for tool in nasm cargo ld; do
+  if ! [ -x "$(which $tool)" ]; then
+    echo "Error: $tool is not installed." >&2
+    exit 1
+  fi
+done
 
-if ! [ -x "$(which cargo)" ]; then
-  echo "Error: cargo is not installed." >&2
-  exit 1
-fi
-
-if ! [ -x "$(which ld)" ]; then
-  echo "Error: ld is not installed." >&2
-  exit 1
-fi
-
-# Create build artifacts directory
-mkdir -p buildartifacts
+mkdir -p build
 
 RUST_TARGET="i686-unknown-linux-gnu"
-RUST_MANIFEST="rust/karion_kernel/Cargo.toml"
-RUST_LIB="rust/karion_kernel/target/${RUST_TARGET}/release/libkarion_kernel.a"
 
-# Ensure 32-bit Rust target is available
 if ! rustup target list --installed | grep -q "^${RUST_TARGET}$"; then
-  echo "Installing missing Rust target: ${RUST_TARGET}"
+  echo "Installing Rust target: ${RUST_TARGET}"
   rustup target add "${RUST_TARGET}"
 fi
 
-# Build Rust kernel core (replaces C kernel objects)
-cargo build --manifest-path "${RUST_MANIFEST}" --release --target "${RUST_TARGET}"
+# Build Rust kernel
+cargo build --release --target "${RUST_TARGET}"
 
-# Compile the assembly files using NASM
-nasm -f elf32 src/boot.asm -o buildartifacts/boot.o
-nasm -f elf32 src/isr.asm -o buildartifacts/isr.o
+# Assemble boot stubs
+nasm -f elf32 asm/boot.asm -o build/boot.o
+nasm -f elf32 asm/isr.asm -o build/isr.o
 
-# Link everything together
-ld -m elf_i386 -T src/linker.ld -o buildartifacts/kernel.bin \
-  buildartifacts/boot.o \
-  buildartifacts/isr.o \
-  "${RUST_LIB}"
+# Link kernel binary
+ld -m elf_i386 -T boot/linker.ld -o build/kernel.bin \
+  build/boot.o \
+  build/isr.o \
+  "target/${RUST_TARGET}/release/libkarion_kernel.a"
 
-# Create ISO if GRUB is available
+# Create bootable ISO
 if [ -x "$(which grub-mkrescue)" ]; then
-    # Create boot directory structure in a separate staging folder
-    mkdir -p isodir/boot/grub
+    mkdir -p build/isodir/boot/grub
+    cp build/kernel.bin build/isodir/boot/kernel
+    cp boot/grub.cfg build/isodir/boot/grub/
+    grub-mkrescue -o build/Karion-OS.iso build/isodir/
+    rm -rf build/isodir
 
-    # Copy kernel and rename it to "kernel" (without .bin extension) to match grub.cfg
-    cp buildartifacts/kernel.bin isodir/boot/kernel
-
-    # Copy grub config
-    cp src/grub.cfg isodir/boot/grub/
-
-    # Ensure output directory exists
-    mkdir -p iso
-
-    # Create ISO in iso folder (reading from isodir)
-    grub-mkrescue -o iso/Karion-OS.iso isodir/
-
-    # Cleanup staging directory
-    rm -rf isodir
-
+    echo ""
     echo "Build complete!"
-    echo "Kernel: buildartifacts/kernel.bin"
-    echo "ISO: iso/Karion-OS.iso"
+    echo "  Kernel: build/kernel.bin"
+    echo "  ISO:    build/Karion-OS.iso"
 else
-    echo "Build complete! (ISO creation skipped - GRUB not found)"
-    echo "Kernel: buildartifacts/kernel.bin"
+    echo ""
+    echo "Build complete! (ISO skipped — GRUB not found)"
+    echo "  Kernel: build/kernel.bin"
 fi
-
-# Cleanup temporary iso boot structure (keep the ISO file)
-rm -rf iso/boot
 
 echo "Done."

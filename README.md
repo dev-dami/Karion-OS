@@ -62,46 +62,51 @@ Only `boot.asm` and `isr.asm` are still assembly because interrupt stubs need `p
 ./build.sh
 ```
 
-Builds the Rust kernel, assembles boot/ISR stubs with NASM, links with LD, and creates a bootable GRUB ISO.
+Builds the Rust kernel, assembles boot/ISR stubs with NASM, links with LD, and creates a bootable GRUB ISO at `build/Karion-OS.iso`.
 
 **Requirements:** `nasm`, `ld` (i686 cross-linker), `grub-mkrescue`, `xorriso`, Rust with `i686-unknown-linux-gnu` target.
 
 Run tests:
 ```bash
-cd rust/karion_kernel && cargo test
+cargo test
 ```
 
 ## Architecture
 
 ```
-src/
-  boot.asm          Multiboot entry, stack setup
-  isr.asm           Interrupt/exception stubs (pushad/iret)
-  linker.ld         ELF layout at 1MB
-  grub.cfg          GRUB bootloader config
+Cargo.toml            Rust crate config (no_std, staticlib)
+build.sh              Build pipeline: cargo + nasm + ld + grub
 
-rust/karion_kernel/src/
-  lib.rs            Kernel entry point, init sequence, main loop
-  gdt.rs            Global Descriptor Table (flat model)
-  idt.rs            Interrupt Descriptor Table (256 entries)
-  isr.rs            Interrupt dispatcher, exception handlers
-  pic.rs            PIC 8259 initialization and EOI
-  pmm.rs            Physical memory manager (bitmap, 32MB)
-  paging.rs         x86 paging (identity maps 20MB)
-  heap.rs           Kernel heap allocator (linked-list, 4MB)
-  vga.rs            VGA text-mode framebuffer (80x25, 16 colors)
-  keyboard.rs       PS/2 scancode decoder (shift, ctrl, extended)
-  shell.rs          Shell with history and command dispatch
-  fs.rs             Filesystem interface (paths, cwd, CRUD)
-  blockfs.rs        Block filesystem (inodes, bitmaps, RAM disk)
-  editor.rs         Nano-like text editor
-  basic.rs          BASIC interpreter with REPL
-  games/            Snake, Tic-Tac-Toe, number guessing
-  drivers/          PIT timer, PS/2 keyboard IRQ handler
-  io.rs             Port I/O (inb, outb)
-  syscall.rs        INT 0x80 syscall interface
-  boot_anim.rs      Boot animation sequence
-  intrinsics.rs     memcpy, memset, etc. for no_std
+asm/
+  boot.asm            Multiboot entry, stack setup
+  isr.asm             Interrupt/exception stubs (pushad/iret)
+
+boot/
+  linker.ld           ELF layout at 1MB
+  grub.cfg            GRUB bootloader config
+
+src/
+  lib.rs              Kernel entry point, init sequence, main loop
+  gdt.rs              Global Descriptor Table (flat model)
+  idt.rs              Interrupt Descriptor Table (256 entries)
+  isr.rs              Interrupt dispatcher, exception handlers
+  pic.rs              PIC 8259 initialization and EOI
+  pmm.rs              Physical memory manager (bitmap, 32MB)
+  paging.rs           x86 paging (identity maps 20MB)
+  heap.rs             Kernel heap allocator (linked-list, 4MB)
+  vga.rs              VGA text-mode framebuffer (80x25, 16 colors)
+  keyboard.rs         PS/2 scancode decoder (shift, ctrl, extended)
+  shell.rs            Shell with history and command dispatch
+  fs.rs               Filesystem interface (paths, cwd, CRUD)
+  blockfs.rs          Block filesystem (inodes, bitmaps, RAM disk)
+  editor.rs           Nano-like text editor
+  basic.rs            BASIC interpreter with REPL
+  games/              Snake, Tic-Tac-Toe, number guessing
+  drivers/            PIT timer, PS/2 keyboard IRQ handler
+  io.rs               Port I/O (inb, outb)
+  syscall.rs          INT 0x80 syscall interface
+  boot_anim.rs        Boot animation sequence
+  intrinsics.rs       memcpy, memset, etc. for no_std
 ```
 
 ## License
