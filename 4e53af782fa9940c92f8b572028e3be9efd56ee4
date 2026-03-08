@@ -1,0 +1,38 @@
+rust/karion_kernel/src/intrinsics.rs
+  0ba3f26d0df73c4e 1
+rust/karion_kernel/src/lib.rs
+  0ba3f26d0df73c4e 4-14,16-23,25-28,30-35,37-38,43,45,61,63-74,79-86,90,93-97,113,120-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "4e53af782fa9940c92f8b572028e3be9efd56ee4",
+  "prompts": {
+    "0ba3f26d0df73c4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef3a3719-7994-4310-a4a2-b90d5db24d92",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 5380,
+      "overriden_lines": 0
+    },
+    "c344cfdf212002ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c702d-dcde-7971-8293-70f74adb150d",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
