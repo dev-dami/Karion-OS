@@ -23,9 +23,42 @@ pub const WHITE: u8 = 15;
 
 static mut INDEX: usize = 0;
 
+// VGA CRTC ports for hardware cursor
+const CRTC_ADDR: u16 = 0x3D4;
+const CRTC_DATA: u16 = 0x3D5;
+
 #[inline]
 fn cell(ch: u8, color: u8) -> u16 {
     (ch as u16) | ((color as u16) << 8)
+}
+
+#[cfg(not(test))]
+fn update_hw_cursor() {
+    unsafe {
+        let pos = INDEX as u16;
+        crate::io::outb(CRTC_ADDR, 0x0F); // cursor low byte register
+        crate::io::outb(CRTC_DATA, (pos & 0xFF) as u8);
+        crate::io::outb(CRTC_ADDR, 0x0E); // cursor high byte register
+        crate::io::outb(CRTC_DATA, ((pos >> 8) & 0xFF) as u8);
+    }
+}
+
+#[cfg(test)]
+fn update_hw_cursor() {}
+
+/// Enable the hardware blinking cursor (scanlines 13-15 = underline style)
+pub fn enable_cursor() {
+    #[cfg(not(test))]
+    {
+        crate::io::outb(CRTC_ADDR, 0x0A);
+        let val = crate::io::inb(CRTC_DATA);
+        crate::io::outb(CRTC_ADDR, 0x0A);
+        crate::io::outb(CRTC_DATA, (val & 0xC0) | 13);
+        crate::io::outb(CRTC_ADDR, 0x0B);
+        let val2 = crate::io::inb(CRTC_DATA);
+        crate::io::outb(CRTC_ADDR, 0x0B);
+        crate::io::outb(CRTC_DATA, (val2 & 0xE0) | 15);
+    }
 }
 
 pub fn clear_screen() {
@@ -35,6 +68,7 @@ pub fn clear_screen() {
         }
         INDEX = 0;
     }
+    update_hw_cursor();
 }
 
 pub fn clear_screen_color(bg: u8) {
@@ -70,6 +104,7 @@ pub fn newline() {
             scroll_up();
         }
     }
+    update_hw_cursor();
 }
 
 pub fn backspace() {
@@ -80,6 +115,7 @@ pub fn backspace() {
         INDEX -= 1;
         core::ptr::write_volatile(VGA_BUFFER.add(INDEX), cell(b' ', WHITE));
     }
+    update_hw_cursor();
 }
 
 pub fn put_char(ch: u8, color: u8) {
@@ -98,6 +134,7 @@ pub fn put_char(ch: u8, color: u8) {
             scroll_up();
         }
     }
+    update_hw_cursor();
 }
 
 pub fn put_char_at(row: usize, col: usize, ch: u8, color: u8) {
@@ -115,6 +152,7 @@ pub fn set_cursor(row: usize, col: usize) {
         unsafe {
             INDEX = row * WIDTH + col;
         }
+        update_hw_cursor();
     }
 }
 

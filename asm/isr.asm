@@ -73,9 +73,14 @@ isr_common_stub:
     mov fs, ax
     mov gs, ax
 
-    push esp                        ; arg: pointer to Registers struct
+    ; Call isr_handler with pointer to Registers struct on stack.
+    ; Align stack to 16 bytes for Rust ABI, preserving original esp.
+    mov ebp, esp                    ; save stack (points to Registers)
+    sub esp, 4                      ; space for arg
+    and esp, 0xFFFFFFF0             ; align to 16 bytes
+    mov [esp], ebp                  ; arg = pointer to Registers
     call isr_handler
-    add esp, 4
+    mov esp, ebp                    ; restore stack
 
     pop eax                         ; restore ds
     mov ds, ax

@@ -169,41 +169,67 @@ impl Shell {
             return;
         }
 
-        match tokens[0] {
-            "help" => self.help(&tokens, argc),
-            "clear" => vga::clear_screen(),
-            "echo" => self.echo(&tokens, argc, fs),
-            "mkdir" => self.mkdir(&tokens, argc, fs),
-            "touch" => self.touch(&tokens, argc, fs),
-            "rm" | "del" => self.del(&tokens, argc, fs),
-            "ls" => self.ls(&tokens, argc, fs),
-            "pwd" => self.pwd(fs),
-            "cd" => self.cd(&tokens, argc, fs),
-            "cat" => self.cat(&tokens, argc, fs),
-            "stat" => self.stat(&tokens, argc, fs),
-            "mv" => self.mv(&tokens, argc, fs),
-            "whoami" => vga::write_line("root", vga::GREEN),
-            "hostname" => vga::write_line("karion", vga::GREEN),
-            "uname" => self.uname(&tokens, argc),
-            "history" => self.show_history(),
+        let cmd = tokens[0];
+        if streq(cmd, "help") {
+            self.help(&tokens, argc);
+        } else if streq(cmd, "clear") {
+            vga::clear_screen();
+        } else if streq(cmd, "echo") {
+            self.echo(&tokens, argc, fs);
+        } else if streq(cmd, "mkdir") {
+            self.mkdir(&tokens, argc, fs);
+        } else if streq(cmd, "touch") {
+            self.touch(&tokens, argc, fs);
+        } else if streq(cmd, "rm") || streq(cmd, "del") {
+            self.del(&tokens, argc, fs);
+        } else if streq(cmd, "ls") {
+            self.ls(&tokens, argc, fs);
+        } else if streq(cmd, "pwd") {
+            self.pwd(fs);
+        } else if streq(cmd, "cd") {
+            self.cd(&tokens, argc, fs);
+        } else if streq(cmd, "cat") {
+            self.cat(&tokens, argc, fs);
+        } else if streq(cmd, "stat") {
+            self.stat(&tokens, argc, fs);
+        } else if streq(cmd, "mv") {
+            self.mv(&tokens, argc, fs);
+        } else if streq(cmd, "whoami") {
+            vga::write_line("root", vga::GREEN);
+        } else if streq(cmd, "hostname") {
+            vga::write_line("karion", vga::GREEN);
+        } else if streq(cmd, "uname") {
+            self.uname(&tokens, argc);
+        } else if streq(cmd, "history") {
+            self.show_history();
+        } else {
             #[cfg(not(test))]
-            "uptime" => self.uptime(),
-            #[cfg(not(test))]
-            "meminfo" => self.meminfo(),
-            #[cfg(not(test))]
-            "nano" => self.nano(&tokens, argc, fs),
-            #[cfg(not(test))]
-            "snake" => crate::games::snake::run(),
-            #[cfg(not(test))]
-            "tictactoe" => crate::games::tictactoe::run(),
-            #[cfg(not(test))]
-            "guess" => crate::games::guess::run(),
-            #[cfg(not(test))]
-            "basic" => self.basic(&tokens, argc, fs),
-            _ => {
-                vga::write_str(tokens[0], vga::RED);
-                vga::write_line(": command not found", vga::RED);
+            {
+                if streq(cmd, "uptime") {
+                    self.uptime();
+                    return;
+                } else if streq(cmd, "meminfo") {
+                    self.meminfo();
+                    return;
+                } else if streq(cmd, "nano") {
+                    self.nano(&tokens, argc, fs);
+                    return;
+                } else if streq(cmd, "snake") {
+                    crate::games::snake::run();
+                    return;
+                } else if streq(cmd, "tictactoe") {
+                    crate::games::tictactoe::run();
+                    return;
+                } else if streq(cmd, "guess") {
+                    crate::games::guess::run();
+                    return;
+                } else if streq(cmd, "basic") {
+                    self.basic(&tokens, argc, fs);
+                    return;
+                }
             }
+            vga::write_str(cmd, vga::RED);
+            vga::write_line(": command not found", vga::RED);
         }
     }
 
@@ -634,6 +660,23 @@ fn u64_to_str(mut val: u64, buf: &mut [u8; 20]) -> &str {
         val /= 10;
     }
     core::str::from_utf8(&buf[pos..]).unwrap_or("?")
+}
+
+/// Manual byte-by-byte string comparison (avoids compiler-generated str match)
+fn streq(a: &str, b: &str) -> bool {
+    let ab = a.as_bytes();
+    let bb = b.as_bytes();
+    if ab.len() != bb.len() {
+        return false;
+    }
+    let mut i = 0;
+    while i < ab.len() {
+        if ab[i] != bb[i] {
+            return false;
+        }
+        i += 1;
+    }
+    true
 }
 
 fn usize_to_str(mut val: usize, buf: &mut [u8; 20]) -> &str {

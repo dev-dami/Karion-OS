@@ -72,6 +72,7 @@ impl Kernel {
         unsafe { core::arch::asm!("sti"); }
 
         boot_anim::run();
+        vga::enable_cursor();
         self.fs.init();
         self.shell.init();
     }
