@@ -1,0 +1,44 @@
+rust/karion_kernel/src/vga.rs
+  0ba3f26d0df73c4e 1,7-8,10,12-20,40-49,99-116,119-126,138-156
+rust/karion_kernel/src/drivers/timer.rs
+  0ba3f26d0df73c4e 1-27
+rust/karion_kernel/src/drivers/keyboard.rs
+  0ba3f26d0df73c4e 1-41
+rust/karion_kernel/src/drivers/mod.rs
+  0ba3f26d0df73c4e 1-7
+rust/karion_kernel/src/keyboard.rs
+  0ba3f26d0df73c4e 8-13,17-18,20,22-27,33-79,88-95,98-104,108-120,123,125,129-134,143-154,158-244
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "9213d9b9d96121f5840c39f554f26617e9096e2a",
+  "prompts": {
+    "0ba3f26d0df73c4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef3a3719-7994-4310-a4a2-b90d5db24d92",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4497,
+      "overriden_lines": 0
+    },
+    "c344cfdf212002ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c702d-dcde-7971-8293-70f74adb150d",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
