@@ -1,0 +1,42 @@
+rust/karion_kernel/src/games/snake.rs
+  0ba3f26d0df73c4e 1-267
+rust/karion_kernel/src/games/guess.rs
+  0ba3f26d0df73c4e 1-111
+rust/karion_kernel/src/games/mod.rs
+  0ba3f26d0df73c4e 1-3
+rust/karion_kernel/src/games/tictactoe.rs
+  0ba3f26d0df73c4e 1-230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "55dfe926ad2b368954aeee15afe5aae0bcae8b0b",
+  "prompts": {
+    "0ba3f26d0df73c4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef3a3719-7994-4310-a4a2-b90d5db24d92",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 695,
+      "overriden_lines": 0
+    },
+    "c344cfdf212002ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c702d-dcde-7971-8293-70f74adb150d",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
