@@ -1,0 +1,35 @@
+src/blockfs.rs
+  0ba3f26d0df73c4e 397-406
+src/shell.rs
+  0ba3f26d0df73c4e 219,223,227
+src/games/tictactoe.rs
+  0ba3f26d0df73c4e 161,174,216,218,221
+README.md
+  0ba3f26d0df73c4e 3-4,23-24,28-30,37-38,118-127
+src/games/snake.rs
+  0ba3f26d0df73c4e 212,227
+src/games/guess.rs
+  0ba3f26d0df73c4e 28,45,88,92
+src/fs.rs
+  0ba3f26d0df73c4e 254,257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "0f74238f01a65c81c6373f885939275e8a44ec57",
+  "prompts": {
+    "0ba3f26d0df73c4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef3a3719-7994-4310-a4a2-b90d5db24d92",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 45,
+      "total_deletions": 17,
+      "accepted_lines": 45,
+      "overriden_lines": 0
+    }
+  }
+}
