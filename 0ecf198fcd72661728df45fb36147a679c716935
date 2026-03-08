@@ -1,0 +1,37 @@
+README.md
+  c344cfdf212002ee 66,68,73,75,105-106,108
+  0ba3f26d0df73c4e 3,5,7,9,11-15,17,21-31,33-57,65,67,69-72,74,76-104,107,109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.8",
+  "base_commit_sha": "0ecf198fcd72661728df45fb36147a679c716935",
+  "prompts": {
+    "0ba3f26d0df73c4e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef3a3719-7994-4310-a4a2-b90d5db24d92",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 84,
+      "overriden_lines": 0
+    },
+    "c344cfdf212002ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019c702d-dcde-7971-8293-70f74adb150d",
+        "model": "gpt-5.3-codex"
+      },
+      "human_author": "dev-dami <damiade5banjo@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
